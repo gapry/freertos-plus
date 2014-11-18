@@ -85,25 +85,34 @@ char recv_byte()
 	while(!xQueueReceive(serial_rx_queue, &msg, portMAX_DELAY));
 	return msg;
 }
-void command_prompt(void *pvParameters)
+
+void 
+command_prompt (void* pvParameters)
 {
-	char buf[128];
-	char *argv[20];
-        char hint[] = USER_NAME "@" USER_NAME "-STM32:~$ ";
-
 	fio_printf(1, "\rWelcome to FreeRTOS Shell\r\n");
-	while(1){
-                fio_printf(1, "%s", hint);
-		fio_read(0, buf, 127);
 	
-		int n=parse_command(buf, argv);
+	while (1) {
+		char buf[128];
+		char *argv[20];
+		char hint[] = USER_NAME "@" USER_NAME "-STM32:~$ ";
 
-		/* will return pointer to the command function */
-		cmdfunc *fptr=do_command(argv[0]);
-		if(fptr!=NULL)
-			fptr(n, argv);
-		else
-			fio_printf(2, "\r\n\"%s\" command not found.\r\n", argv[0]);
+        fio_printf (1, "%s", hint);
+		fio_read (0, buf, 127);
+	
+		int n = parse_command (buf, argv);
+		//will return pointer to the command function 
+		cmdfunc *fptr = do_command (argv[0]);
+
+		/* 
+		 * Press Enter is normal behavior
+		 */
+		if (NULL != fptr) {
+			fptr (n, argv);
+		} else if ('\0' != *argv[0]) {
+			fio_printf (2, "\r\n\"%s\" command not found.\r\n", argv[0]);
+		} else {
+			fio_printf (1, "\r\n");	
+		}
 	}
 
 }
