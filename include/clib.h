@@ -10,7 +10,7 @@
 
 /* fprintf for fio */
 size_t fio_printf(int fd, const char *format, ...);
-int sprnitf(char *, const char *, ...);
+int sprintf(char *, const char *, ...);
 
 /* I would like to rename itoa as to_string (idea from C++11) 
  * however c doesn't allow function overloading */
