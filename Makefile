@@ -51,7 +51,7 @@ SRC = $(wildcard $(addsuffix /*.c,$(SRCDIR))) \
       $(CMSIS_PLAT_SRC)/startup/gcc_ride7/startup_stm32f10x_md.s
 OBJ := $(addprefix $(OUTDIR)/,$(patsubst %.s,%.o,$(SRC:.c=.o)))
 DEP = $(OBJ:.o=.o.d)
-DAT =
+DAT = $(OUTDIR)/$(DATDIR)/test-romfs.o
  
 MAKDIR = mk
 MAK = $(wildcard $(MAKDIR)/*.mk)

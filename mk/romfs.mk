@@ -1,5 +1,4 @@
 ROMDIR = $(DATDIR)/test-romfs
-DAT += $(OUTDIR)/$(DATDIR)/test-romfs.o
 
 $(OUTDIR)/$(ROMDIR).o: $(OUTDIR)/$(ROMDIR).bin
 	@mkdir -p $(dir $@)
