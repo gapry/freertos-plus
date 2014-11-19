@@ -16,6 +16,8 @@ struct fs_t {
 
 static struct fs_t fss[MAX_FS];
 
+uint32_t hash_key;
+
 __attribute__((constructor)) void fs_init() {
     memset(fss, 0, sizeof(fss));
 }
@@ -29,7 +31,9 @@ int register_fs(const char * mountpoint, fs_open_t callback, void * opaque) {
             fss[i].hash = hash_djb2((const uint8_t *) mountpoint, -1);
             fss[i].cb = callback;
             fss[i].opaque = opaque;
-            return 0;
+			
+			hash_key = fss[i].hash;
+			return 0;
         }
     }
     
