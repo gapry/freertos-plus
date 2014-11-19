@@ -11,11 +11,23 @@
 
 #include "bufbomb.h"
 
+#include "romfs.h"
+#include <unistd.h>
+
+#define MAX_LIST_FILES 16
+
 typedef struct {
 	const char *name;
 	cmdfunc *fptr;
 	const char *desc;
 } cmdlist;
+
+struct fs_t {
+	uint32_t hash;
+	fs_open_t cb;
+	void* opaque;
+};
+extern struct fs_t fss[MAX_LIST_FILES];
 
 void ls_command(int, char **);
 void man_command(int, char **);
@@ -42,6 +54,22 @@ cmdlist cl[]={
 	MKCL(bufbomb, "buffer overflow attack bomb")
 };
 
+/* 
+ * In alignement case, 
+ * chunk[0] := Filename, 32B
+ * chunk[1] := Hash, 4B
+ * chunk[2] := Filesize, 4B
+ * chunk[3] := Content
+ */
+
+uint32_t fetch_unaligned_chunk (const uint8_t* chunk)
+{
+	return ((uint32_t) chunk[0]) | 
+			((uint32_t) (chunk[1] << 8)) |
+			((uint32_t) (chunk[2] << 16)) | 
+			((uint32_t) (chunk[3] << 24));
+}
+
 int parse_command(char *str, char *argv[]){
 	int b_quote=0, b_dbquote=0;
 	int i;
@@ -63,8 +91,21 @@ int parse_command(char *str, char *argv[]){
 	return count;
 }
 
-void ls_command(int n, char *argv[]){
+void ls_command (int n, char *argv[])
+{
+	char* path = "romfs";
+	uint32_t curhash = hash_djb2 ((const uint8_t* )path, -1);
+	int i;
 
+	for (i = 0; i < MAX_LIST_FILES && curhash == fss[i].hash; ++i) {
+		const uint8_t* romfs_addr = (const uint8_t *)fss[i].opaque;
+		const uint8_t* meta = romfs_addr;
+		while (fetch_unaligned_chunk (meta + 32) && fetch_unaligned_chunk (meta + 36)) {
+			fio_printf (1, "%s\n\r", meta);
+			
+			meta = meta + fetch_unaligned_chunk (meta + 36) + 40;		
+		}
+	}
 }
 
 int filedump(const char *filename){

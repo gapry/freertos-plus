@@ -33,6 +33,7 @@ void processdir(DIR * dirp, const char * curpath, FILE * outfile, const char * p
     uint32_t size, w, hash;
     uint8_t b;
     FILE * infile;
+	char filename[32];
 
     while ((ent = readdir(dirp))) {
         strcpy(fullpath, prefix);
@@ -59,6 +60,7 @@ void processdir(DIR * dirp, const char * curpath, FILE * outfile, const char * p
                 perror("opening input file");
                 exit(-1);
             }
+			strcpy (filename, ent->d_name); fwrite (filename, 1, 32, outfile);
             b = (hash >>  0) & 0xff; fwrite(&b, 1, 1, outfile);
             b = (hash >>  8) & 0xff; fwrite(&b, 1, 1, outfile);
             b = (hash >> 16) & 0xff; fwrite(&b, 1, 1, outfile);
